@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WiFi QR Code Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #00ff00 0%, #00cc00 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .security-note {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #00ff00 0%, #00cc00 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 255, 0, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        #qrcode {
+            display: none;
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        #qrcode.show {
+            display: block;
+        }
+
+        #qrcode canvas, #qrcode img {
+            margin: 0 auto;
+            display: block;
+            border-radius: 8px;
+        }
+
+        .download-btn {
+            margin-top: 15px;
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+        }
+
+        .download-btn:hover {
+            box-shadow: 0 10px 20px rgba(86, 171, 47, 0.4);
+        }
+
+        .qr-label {
+            margin-top: 15px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .wifi-icon {
+            font-size: 48px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="wifi-icon">📶</div>
+        <h1>WiFi QR Code Generator</h1>
+        
+        <form id="wifiForm">
+            <div class="form-group">
+                <label for="ssid">Network Name (SSID)</label>
+                <input type="text" id="ssid" placeholder="Enter WiFi network name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter WiFi password" required>
+            </div>
+
+            <div class="form-group">
+                <label for="encryption">Security Type</label>
+                <select id="encryption" required>
+                    <option value="WPA">WPA/WPA2</option>
+                    <option value="WEP">WEP</option>
+                    <option value="nopass">No Password</option>
+                </select>
+            </div>
+
+            <button type="submit">Generate QR Code</button>
+        </form>
+
+        <div id="qrcode">
+            <p class="qr-label">Scan this QR code to connect</p>
+            <div id="qrcodeCanvas"></div>
+            <button class="download-btn" id="downloadBtn">Download QR Code</button>
+        </div>
+    </div>
+
+    <script>
+        let qrCodeInstance = null;
+
+        document.getElementById('wifiForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const ssid = document.getElementById('ssid').value;
+            const password = document.getElementById('password').value;
+            const encryption = document.getElementById('encryption').value;
+            
+            document.getElementById('qrcodeCanvas').innerHTML = '';
+            
+            let wifiString;
+            if (encryption === 'nopass') {
+                wifiString = `WIFI:T:nopass;S:${ssid};;`;
+            } else {
+                wifiString = `WIFI:T:${encryption};S:${ssid};P:${password};;`;
+            }
+
+            qrCodeInstance = new QRCode(document.getElementById('qrcodeCanvas'), {
+                text: wifiString,
+                width: 256,
+                height: 256,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            
+            document.getElementById('qrcode').classList.add('show');
+        });
+
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            const canvas = document.querySelector('#qrcodeCanvas canvas');
+            if (canvas) {
+                const url = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.download = 'wifi-qr-code.png';
+                link.href = url;
+                link.click();
+            }
+        });
+
+        document.getElementById('encryption').addEventListener('change', function() {
+            const passwordField = document.getElementById('password');
+            if (this.value === 'nopass') {
+                passwordField.required = false;
+                passwordField.disabled = true;
+                passwordField.value = '';
+            } else {
+                passwordField.required = true;
+                passwordField.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

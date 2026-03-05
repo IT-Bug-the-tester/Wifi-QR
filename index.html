@@ -31,7 +31,6 @@
 
         h1 { color: #333; margin-bottom: 10px; font-size: 28px; text-align: center; }
 
-        /* Tabs */
         .tabs {
             display: flex;
             background: #f0f0f0;
@@ -74,7 +73,6 @@
         .tab-panel { display: none; }
         .tab-panel.active { display: block; }
 
-        /* Form */
         .form-group { margin-bottom: 20px; }
 
         label {
@@ -118,7 +116,6 @@
             box-shadow: 0 10px 20px rgba(0,255,0,0.4);
         }
 
-        /* QR Result */
         .qr-result {
             display: none;
             text-align: center;
@@ -163,7 +160,6 @@
     <div class="wifi-icon">🔳</div>
     <h1>QR Code Generator</h1>
 
-    <!-- Tabs -->
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('wifi', this)">📡 WiFi</button>
         <button class="tab-btn" onclick="switchTab('link', this)">🔗 Link</button>
@@ -204,7 +200,6 @@
                 <label for="linkUrl">URL or Link</label>
                 <input type="url" id="linkUrl" placeholder="https://example.com" required>
             </div>
-
             <button type="submit">Generate QR Code</button>
         </form>
         <div id="qrcode-link" class="qr-result">
@@ -237,14 +232,13 @@
         generateQR('wifi', wifiString);
     });
 
-    // Link Form
+    // Link Form — FIX: removed reference to non-existent 'linkLabel' field
     document.getElementById('linkForm').addEventListener('submit', function(e) {
         e.preventDefault();
         const url = document.getElementById('linkUrl').value;
-        const label = document.getElementById('linkLabel').value;
 
         const labelEl = document.getElementById('link-qr-label');
-        labelEl.textContent = label ? `Scan to open: ${label}` : 'Scan to open link';
+        labelEl.textContent = 'Scan to open link';
 
         generateQR('link', url);
     });

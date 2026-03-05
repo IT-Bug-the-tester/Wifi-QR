@@ -3,14 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WiFi QR Code Generator</title>
+    <title>QR Code Generator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -25,29 +21,61 @@
         .container {
             background: white;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             padding: 40px;
             max-width: 500px;
             width: 100%;
         }
 
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 28px;
-            text-align: center;
+        .wifi-icon { font-size: 48px; text-align: center; margin-bottom: 20px; }
+
+        h1 { color: #333; margin-bottom: 10px; font-size: 28px; text-align: center; }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background: #f0f0f0;
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 28px;
+            gap: 4px;
         }
 
-        .subtitle {
-            color: #666;
-            text-align: center;
-            margin-bottom: 30px;
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
             font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            background: transparent;
+            color: #666;
+            transition: all 0.2s;
+            width: auto;
+            margin-top: 0;
+            box-shadow: none;
+            transform: none;
         }
 
-        .form-group {
-            margin-bottom: 20px;
+        .tab-btn:hover {
+            background: rgba(0,200,0,0.1);
+            color: #00aa00;
+            transform: none;
+            box-shadow: none;
         }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #00ff00 0%, #00cc00 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,200,0,0.3);
+        }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* Form */
+        .form-group { margin-bottom: 20px; }
 
         label {
             display: block;
@@ -68,16 +96,10 @@
 
         input:focus, select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #00cc00;
         }
 
-        .security-note {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        button {
+        button[type="submit"] {
             width: 100%;
             padding: 14px;
             background: linear-gradient(135deg, #00ff00 0%, #00cc00 100%);
@@ -91,16 +113,13 @@
             margin-top: 10px;
         }
 
-        button:hover {
+        button[type="submit"]:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0, 255, 0, 0.4);
+            box-shadow: 0 10px 20px rgba(0,255,0,0.4);
         }
 
-        button:active {
-            transform: translateY(0);
-        }
-
-        #qrcode {
+        /* QR Result */
+        .qr-result {
             display: none;
             text-align: center;
             margin-top: 30px;
@@ -109,54 +128,58 @@
             border-radius: 12px;
         }
 
-        #qrcode.show {
-            display: block;
-        }
+        .qr-result.show { display: block; }
 
-        #qrcode canvas, #qrcode img {
+        .qr-result canvas, .qr-result img {
             margin: 0 auto;
             display: block;
             border-radius: 8px;
         }
 
+        .qr-label { margin-bottom: 15px; font-weight: 600; color: #333; }
+
         .download-btn {
+            width: 100%;
             margin-top: 15px;
+            padding: 14px;
             background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
 
         .download-btn:hover {
-            box-shadow: 0 10px 20px rgba(86, 171, 47, 0.4);
-        }
-
-        .qr-label {
-            margin-top: 15px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .wifi-icon {
-            font-size: 48px;
-            text-align: center;
-            margin-bottom: 20px;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(86,171,47,0.4);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="wifi-icon">📶</div>
-        <h1>WiFi QR Code Generator</h1>
-        
+<div class="container">
+    <div class="wifi-icon">📶</div>
+    <h1>QR Code Generator</h1>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('wifi', this)">📡 WiFi</button>
+        <button class="tab-btn" onclick="switchTab('link', this)">🔗 Link</button>
+    </div>
+
+    <!-- WiFi Tab -->
+    <div id="tab-wifi" class="tab-panel active">
         <form id="wifiForm">
             <div class="form-group">
                 <label for="ssid">Network Name (SSID)</label>
                 <input type="text" id="ssid" placeholder="Enter WiFi network name" required>
             </div>
-
             <div class="form-group">
                 <label for="password">Password</label>
                 <input type="password" id="password" placeholder="Enter WiFi password" required>
             </div>
-
             <div class="form-group">
                 <label for="encryption">Security Type</label>
                 <select id="encryption" required>
@@ -165,70 +188,105 @@
                     <option value="nopass">No Password</option>
                 </select>
             </div>
-
             <button type="submit">Generate QR Code</button>
         </form>
-
-        <div id="qrcode">
-            <p class="qr-label">Scan this QR code to connect</p>
-            <div id="qrcodeCanvas"></div>
-            <button class="download-btn" id="downloadBtn">Download QR Code</button>
+        <div id="qrcode-wifi" class="qr-result">
+            <p class="qr-label">Scan to connect to WiFi</p>
+            <div id="qrcodeCanvas-wifi"></div>
+            <button class="download-btn" onclick="downloadQR('wifi')">Download QR Code</button>
         </div>
     </div>
 
-    <script>
-        let qrCodeInstance = null;
+    <!-- Link Tab -->
+    <div id="tab-link" class="tab-panel">
+        <form id="linkForm">
+            <div class="form-group">
+                <label for="linkUrl">URL or Link</label>
+                <input type="url" id="linkUrl" placeholder="https://example.com" required>
+            </div>
 
-        document.getElementById('wifiForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const ssid = document.getElementById('ssid').value;
-            const password = document.getElementById('password').value;
-            const encryption = document.getElementById('encryption').value;
-            
-            document.getElementById('qrcodeCanvas').innerHTML = '';
-            
-            let wifiString;
-            if (encryption === 'nopass') {
-                wifiString = `WIFI:T:nopass;S:${ssid};;`;
-            } else {
-                wifiString = `WIFI:T:${encryption};S:${ssid};P:${password};;`;
-            }
+            <button type="submit">Generate QR Code</button>
+        </form>
+        <div id="qrcode-link" class="qr-result">
+            <p class="qr-label" id="link-qr-label">Scan to open link</p>
+            <div id="qrcodeCanvas-link"></div>
+            <button class="download-btn" onclick="downloadQR('link')">Download QR Code</button>
+        </div>
+    </div>
+</div>
 
-            qrCodeInstance = new QRCode(document.getElementById('qrcodeCanvas'), {
-                text: wifiString,
-                width: 256,
-                height: 256,
-                colorDark: "#000000",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
-            });
-            
-            document.getElementById('qrcode').classList.add('show');
+<script>
+    function switchTab(name, btn) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-' + name).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    // WiFi Form
+    document.getElementById('wifiForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const ssid = document.getElementById('ssid').value;
+        const password = document.getElementById('password').value;
+        const encryption = document.getElementById('encryption').value;
+
+        const wifiString = encryption === 'nopass'
+            ? `WIFI:T:nopass;S:${ssid};;`
+            : `WIFI:T:${encryption};S:${ssid};P:${password};;`;
+
+        generateQR('wifi', wifiString);
+    });
+
+    // Link Form
+    document.getElementById('linkForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const url = document.getElementById('linkUrl').value;
+        const label = document.getElementById('linkLabel').value;
+
+        const labelEl = document.getElementById('link-qr-label');
+        labelEl.textContent = label ? `Scan to open: ${label}` : 'Scan to open link';
+
+        generateQR('link', url);
+    });
+
+    function generateQR(type, text) {
+        const canvas = document.getElementById('qrcodeCanvas-' + type);
+        canvas.innerHTML = '';
+
+        new QRCode(canvas, {
+            text: text,
+            width: 256,
+            height: 256,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
         });
 
-        document.getElementById('downloadBtn').addEventListener('click', function() {
-            const canvas = document.querySelector('#qrcodeCanvas canvas');
-            if (canvas) {
-                const url = canvas.toDataURL('image/png');
-                const link = document.createElement('a');
-                link.download = 'wifi-qr-code.png';
-                link.href = url;
-                link.click();
-            }
-        });
+        document.getElementById('qrcode-' + type).classList.add('show');
+    }
 
-        document.getElementById('encryption').addEventListener('change', function() {
-            const passwordField = document.getElementById('password');
-            if (this.value === 'nopass') {
-                passwordField.required = false;
-                passwordField.disabled = true;
-                passwordField.value = '';
-            } else {
-                passwordField.required = true;
-                passwordField.disabled = false;
-            }
-        });
-    </script>
+    function downloadQR(type) {
+        const canvas = document.querySelector('#qrcodeCanvas-' + type + ' canvas');
+        if (canvas) {
+            const link = document.createElement('a');
+            link.download = type === 'wifi' ? 'wifi-qr-code.png' : 'link-qr-code.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    }
+
+    // Disable password field when "No Password" is selected
+    document.getElementById('encryption').addEventListener('change', function() {
+        const passwordField = document.getElementById('password');
+        if (this.value === 'nopass') {
+            passwordField.required = false;
+            passwordField.disabled = true;
+            passwordField.value = '';
+        } else {
+            passwordField.required = true;
+            passwordField.disabled = false;
+        }
+    });
+</script>
 </body>
 </html>
